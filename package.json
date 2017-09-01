@@ -1,16 +1,15 @@
 {
-  "name": "chat-app",
+  "name": "node-chat-app",
   "version": "1.0.0",
-  "description": "\"Node chat application\"",
+  "description": "Node chat application",
   "main": "index.js",
   "scripts": {
     "start": "node server/server.js"
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "engines" : {
-    "node" : "8.1.3"
+  "engines": {
+    "node": "8.1.3"
   },
-  "author": "",
+  "author": "VVV",
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.4",

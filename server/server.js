@@ -1,6 +1,7 @@
 /////  Set up Chat Application
 /// Run:  nodemon  server/server.js
-///
+/// O HEROKU:
+///    https://polar-depths-68329.herokuapp.com/
 /////////////////// Dependencies.
 //  npm Express:  npm i express@4.15.4 --save
 //  npm morgan:  npm  i  morgan@1.8.2 --save   // HTTP logger
@@ -65,6 +66,21 @@ function logSock(desc, socket) {
 io.on('connection', (socket) => {  // Particular client connection opens.
     logSock('New user connected. using WebSocket.IO proto',socket);
 
+////////////////////////////////////////////////////////////////////////////////////////
+// Challenge  of Broadcast Events. New Functionality:
+/// 1. socket.emit  from: Admin  text: Welcome to the chat app
+socket.emit('newMessage', {
+  from: 'Admin',
+  text: 'Welcome to the chat App',
+  createdAt: new Date().getTime()
+});
+/// 2. socket.broadcast.emit from:  Admin  text: New user joined
+socket.broadcast.emit('newMessage', {
+  from: 'Admin',
+  text: 'New User joined',
+  createdAt: new Date().getTime()
+});
+
 ///////////////////////////////////////////////////////////////////////////////////
 /// newEmail custom event
 ////
@@ -72,7 +88,7 @@ io.on('connection', (socket) => {  // Particular client connection opens.
     socket.emit('newEmail', {
       from : 'mike@example.com',
       text : 'Email custom data',
-      createdAt: 123456
+      createdAt: new Date().getTime()
     });
 
     // Custom event listener on server side to createEmail.
@@ -86,13 +102,15 @@ io.on('connection', (socket) => {  // Particular client connection opens.
     socket.emit('newMessage', {
       from : "BubbleSBubbles",
       text : "Hi, Hello World!, How are you?",
-      createdAt : 12345677
+      createdAt : new Date().getTime()
     });
 
     socket.on('createMessage', (message) => {
       console.log('createMessage acceped: ', message);
-      // Section9 . Lecture 109.  Also broadcast message to all connected clients.
-      io.emit('newMessage', {   // io.emit() method broadcast messages to all connected clients
+      // Section9 . Lecture 109.  Also broadcast message to connected clients.
+       // io.emit() method broadcast messages to all connected clients
+       // socket.broadcast.emit() method broadcast messages to "other" connected clients
+      socket.broadcast.emit('newMessage', {
         from: message.from,
         text: message.text,
         createdAt: new Date().getTime()

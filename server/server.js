@@ -53,19 +53,63 @@ app.get('*', function(req, res) {
 // New individual connection event, one of the all users, connected to the server
 //// https://socket.io/docs/server-api/
 //
+// Helper function
 function logSock(desc, socket) {
   console.log(desc, socket.handshake.time,
                     socket.handshake.headers.referer,
                     socket.handshake.address,
                     socket.handshake.query);
 };
+
+// Standard connection listener
 io.on('connection', (socket) => {  // Particular client connection opens.
     logSock('New user connected. using WebSocket.IO proto',socket);
+
+///////////////////////////////////////////////////////////////////////////////////
+/// newEmail custom event
+////
+// Server emits event for this particular connection
+    socket.emit('newEmail', {
+      from : 'mike@example.com',
+      text : 'Email custom data',
+      createdAt: 123456
+    });
+
+    // Custom event listener on server side to createEmail.
+    socket.on('createEmail',(newEmail) => {
+        console.log('createEmail assepted:', newEmail);
+    });
+
+    //////////////////////////////////////////////////////////////////////
+    // newMessage / createMessage custom event Emitter / listener
+    ///
+    socket.emit('newMessage', {
+      from : "BubbleSBubbles",
+      text : "Hi, Hello World!, How are you?",
+      createdAt : 12345677
+    });
+
+    socket.on('createMessage', (message) => {
+      console.log('createMessage acceped: ', message);
+      // Section9 . Lecture 109.  Also broadcast message to all connected clients.
+      io.emit('newMessage', {   // io.emit() method broadcast messages to all connected clients
+        from: message.from,
+        text: message.text,
+        createdAt: new Date().getTime()
+      });
+    });
+
+    //////////////////////////////////////////////////////////////////////
+    // Standard  socketIO  client "disconnect" event listener
     socket.on('disconnect', (socket) => {
       console.log("Disconnected from server Socket.IO",socket);
     });
-});
 
+});   //// IO on  'connection'.
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+/// Server  start listening on the predefined port
+///
 server.listen(port , () => {     // http module replaces Express JS here.
   console.log(`App is listening on port: ${port}`);
 });

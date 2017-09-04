@@ -19,7 +19,7 @@ log("create message", {from : , text : })
 
 
 Challenge to lecture 109:   To  implement Broadcast application
-( Deployed on Heroku  https://polar-depths-68329.herokuapp.com/ )
+( Has been deployed on Heroku  https://polar-depths-68329.herokuapp.com/ )
 
 1.   <->   Socket.io Events For Chat App
 
@@ -44,4 +44,12 @@ Challenge to lecture 109:   To  implement Broadcast application
               createdAt: new Date().getTime()
           });
 
-      }); 
+      });
+
+Section 9. Lecture 111.  Implement Event acknolegements.
+
+1. SocketIO Events for chat application.
+
+2. Server Emit Event      -->   newMessage Event (from , text , createAt ) -->  Client Listens for Event.
+
+3. Server Listen for Event  <-- createMessage Event  (from, text) <--  Client Emit Event . And Acknolegement from server : Was the message data valid ?

@@ -6,6 +6,11 @@
 //  npm Express:  npm i express@4.15.4 --save
 //  npm morgan:  npm  i  morgan@1.8.2 --save   // HTTP logger
 //  SocketIO      :  npm i   socket.io@2.0.3 --save  // real-time  bidirectional event-based communication
+//  Unit testing of the node-chat-app
+// npm install expect@1.20.2 mocha@3.1.2 --save-dev
+// Local recent nodemon:
+//   !!!! Does not work on Windows nvm :  npm install nodemon@1.11.0  --save-dev
+//
 //// Challenge 1. ( DONE successfully )
 ////  1. Configure brand new Express application.
 ////   2. Set up static middleware to serve public folder with index.html
@@ -24,6 +29,7 @@ const port = process.env.PORT || 3000;
 const express = require('express');
 const logger = require('morgan');
 const socketIO = require('socket.io');
+const {generateMessage} = require('./utils/message');
 
 
 var app = express();    // configure it below
@@ -69,52 +75,22 @@ io.on('connection', (socket) => {  // Particular client connection opens.
 ////////////////////////////////////////////////////////////////////////////////////////
 // Challenge  of Broadcast Events. New Functionality:
 /// 1. socket.emit  from: Admin  text: Welcome to the chat app
-socket.emit('newMessage', {
-  from: 'Admin',
-  text: 'Welcome to the chat App',
-  createdAt: new Date().getTime()
-});
+socket.emit('newMessage', generateMessage( 'Admin', 'Welcome to the chat App') );
 /// 2. socket.broadcast.emit from:  Admin  text: New user joined
-socket.broadcast.emit('newMessage', {
-  from: 'Admin',
-  text: 'New User joined',
-  createdAt: new Date().getTime()
-});
-
-///////////////////////////////////////////////////////////////////////////////////
-/// newEmail custom event
-////
-// Server emits event for this particular connection
-    socket.emit('newEmail', {
-      from : 'mike@example.com',
-      text : 'Email custom data',
-      createdAt: new Date().getTime()
-    });
-
-    // Custom event listener on server side to createEmail.
-    socket.on('createEmail',(newEmail) => {
-        console.log('createEmail assepted:', newEmail);
-    });
+// socket.broadcast.emit() method broadcast messages to "other" connected clients
+socket.broadcast.emit('newMessage', generateMessage( 'Admin', 'New User joined'));
 
     //////////////////////////////////////////////////////////////////////
-    // newMessage / createMessage custom event Emitter / listener
-    ///
-    socket.emit('newMessage', {
-      from : "BubbleSBubbles",
-      text : "Hi, Hello World!, How are you?",
-      createdAt : new Date().getTime()
-    });
+    // new createMessage custom event  listener
+    //////////////////////////////////////////////////////////////////////
 
-    socket.on('createMessage', (message) => {
-      console.log('createMessage acceped: ', message);
+    socket.on('createMessage', (message, callback) => {
+      console.log('createMessage received : ', message);
       // Section9 . Lecture 109.  Also broadcast message to connected clients.
        // io.emit() method broadcast messages to all connected clients
-       // socket.broadcast.emit() method broadcast messages to "other" connected clients
-      socket.broadcast.emit('newMessage', {
-        from: message.from,
-        text: message.text,
-        createdAt: new Date().getTime()
-      });
+       io.emit('newMessage', generateMessage(message.from, message.text));
+       // Lecture 111. Acknolegement callback to the client.
+       callback('This is from the server. ');  // acknolegement to the client
     });
 
     //////////////////////////////////////////////////////////////////////

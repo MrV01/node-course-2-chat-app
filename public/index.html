@@ -9,10 +9,18 @@
 </head>
 <body>
   <h1>Welcome to the chat app</h1>
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
   <p><a href="https://socket.io/docs/">SocketIO docs.</a></p>
+  <ol id="messages">
+    <!-- List of messages -->
+  </ol>
+  <form id="message-form">
+      <input type="text" name="message"  placeholder="Message text here">
+      <button type="submit" value="Send" name="submit">Send</button>
+    </form>
 
    <script src="/socket.io/socket.io.js"></script>  <!-- SocketIO client library -->
+   <script src="/js/libs/jquery-3.2.1.js"></script> <!-- jquery-3 -->
    <script src="/js/index.js"></script>  <!-- SocketIO JS code -->
 </body>
 </html>

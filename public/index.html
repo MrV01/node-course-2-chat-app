@@ -12,13 +12,15 @@
   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
   <p><a href="https://socket.io/docs/">SocketIO docs.</a></p>
   <ol id="messages">
-    <!-- List of messages -->
+    <!-- List of messages will be created by JS file-->
   </ol>
   <form id="message-form">
       <input type="text" name="message"  placeholder="Message text here">
       <button type="submit" value="Send" name="submit">Send</button>
     </form>
-
+    <!-- Share Geolocation Button -->
+    <button id="send-location" name="sendGeolocation">Share Geo location</button>
+    
    <script src="/socket.io/socket.io.js"></script>  <!-- SocketIO client library -->
    <script src="/js/libs/jquery-3.2.1.js"></script> <!-- jquery-3 -->
    <script src="/js/index.js"></script>  <!-- SocketIO JS code -->

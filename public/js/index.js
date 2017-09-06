@@ -24,6 +24,18 @@ socket.on('newMessage', function(message) {
   jQuery('#messages').append(li);
 });
 
+/////// Custom event listener  on the client (browser) side.
+socket.on('newLocationMessage', function(message) {
+    console.log('newLocationMessage', message);
+    var li = jQuery('<li></li>');
+    // !Eurica! Ancor tag for the URL required for clicking
+    var a = jQuery('<a target="_blank">My current location</a>');
+    li.text(`${message.from}: `);
+    a.attr('href', message.url);   // to prevent code injection
+    li.append(a);
+    jQuery('#messages').append(li);
+});
+
 // Custom Event Emitter with Acknolegement to the client via callback function.
 function sendChatMessage( fromName, messageText) {
         socket.emit('createMessage', {
@@ -37,7 +49,10 @@ function sendChatMessage( fromName, messageText) {
 //
 sendChatMessage("Freddy", "Good Day, I am Freddy. How are you?");
 
-///  JQuery Event handlers
+////////////////////////////////////////////////////////////////////////////////////////////
+/// Message form , Geolocation  lectures.
+/////////////////////////////////////////////////////////////////////////////////////////////
+///  "Send Message"  JQuery Event handler ( message form lession)
 
 jQuery('#message-form').on('submit', function (ev) {
 
@@ -54,4 +69,42 @@ jQuery('#message-form').on('submit', function (ev) {
       sendChatMessage(name, values.message);
     }
 
-} );
+});
+
+/////////////////////////////////////////////////////////////////////////////////
+/// How to volunary Share geolocation
+////////////////////////////////////////////////////////////////////////////////
+// 1. Add buttton  id="send location" in .html file
+// 2. Create event handler .on(click, ) in index.js  and handler in server.js on the server side.
+// 3. Server broadcasts  io.emit('newMessage', textString) to all connected clients
+///      Geolocation PART 2:
+///  4.  Instead of sharing pair of coordinates,  send to clients link to
+///       a google maps.
+///      Modification of  server.js  to emit  newLocationMessage in response
+///       to createLocationMessage event-request,  and
+///       in index.js  add handler.  on.('newLocationMessage', ...) ) to broadcast location
+///
+
+var locationButton = jQuery('#send-location');
+locationButton.on('click', function () {
+  // Check if geolocation is available in the browser.
+  if(!navigator.geolocation) {
+    return alert('Geolocation not supported by you browser.');
+  }
+
+  // Get browser's current position and send request 'createLocationMessage'
+  /// for broadcast to others.
+  //
+  navigator.geolocation.getCurrentPosition( function (position){
+      console.log("Current geolocation object  : ", position);
+      socket.emit('createLocationMessage', { // send the message to server
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      }, function (data) { // get back data from server.
+          console.log('Got it : ', data);
+      });
+  }, function () { // error during navigator.geolocation request.
+      alert("Not able to fetch current location.");
+  });
+
+});

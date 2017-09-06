@@ -1,6 +1,6 @@
 /////  Set up Chat Application
 /// Run:  nodemon  server/server.js
-/// O HEROKU:
+/// O HEROKY:
 ///    https://polar-depths-68329.herokuapp.com/
 /////////////////// Dependencies.
 //  npm Express:  npm i express@4.15.4 --save
@@ -29,7 +29,7 @@ const port = process.env.PORT || 3000;
 const express = require('express');
 const logger = require('morgan');
 const socketIO = require('socket.io');
-const {generateMessage} = require('./utils/message');
+const {generateMessage, generateLocationMessage} = require('./utils/message');
 
 
 var app = express();    // configure it below
@@ -60,7 +60,7 @@ app.get('*', function(req, res) {
 // New individual connection event, one of the all users, connected to the server
 //// https://socket.io/docs/server-api/
 //
-// Helper function
+// Helper logSock function
 function logSock(desc, socket) {
   console.log(desc, socket.handshake.time,
                     socket.handshake.headers.referer,
@@ -90,11 +90,24 @@ socket.broadcast.emit('newMessage', generateMessage( 'Admin', 'New User joined')
        // io.emit() method broadcast messages to all connected clients
        io.emit('newMessage', generateMessage(message.from, message.text));
        // Lecture 111. Acknolegement callback to the client.
-       callback('This is from the server. ');  // acknolegement to the client
+       callback('ACK from the server: createMessage');  // acknolegement to the client
+    });
+
+
+    //////////////////////////////////////////////////////////////
+    /// Share location message to the clients
+    //////////////////////////////////////////////////////////////
+
+    socket.on('createLocationMessage', (coords,callback) => {
+      console.log('createLocationMessage received : ', coords);
+      io.emit('newLocationMessage',
+          generateLocationMessage('Admin', coords.latitude , coords.longitude));
+      callback('ACK from the server: createLocationMessage');
     });
 
     //////////////////////////////////////////////////////////////////////
     // Standard  socketIO  client "disconnect" event listener
+    ///////////////////////////////////////////////////////////////////////
     socket.on('disconnect', (socket) => {
       console.log("Disconnected from server Socket.IO",socket);
     });

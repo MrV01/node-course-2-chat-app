@@ -25,7 +25,7 @@ describe('generate message ', () => {
 /// Test(s) of    generateLocationMessage
 describe ('generate Location Message', () => {
       //  When it()  - no arguments it is SYNCRONOUS Test
-      //  In case it(done)  -  argument is callback function  ASYNCRONOUS
+      //  In case it(done)  -  argument is a callback function  ASYNCRONOUS
       it('should generate correct location object' , () => {
           var from = 'Jeremy';
           var latitude = 123;

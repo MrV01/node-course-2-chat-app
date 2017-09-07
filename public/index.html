@@ -4,23 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="/css/styles.css">
   <title>The Chat App</title>
-
 </head>
-<body>
-  <h1>Welcome to the chat app</h1>
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
-  <p><a href="https://socket.io/docs/">SocketIO docs.</a></p>
-  <ol id="messages">
-    <!-- List of messages will be created by JS file-->
-  </ol>
-  <form id="message-form">
-      <input type="text" name="message"  placeholder="Message text here">
-      <button type="submit" value="Send" name="submit">Send</button>
-    </form>
-    <!-- Share Geolocation Button -->
-    <button id="send-location" name="sendGeolocation">Share Geo location</button>
-    
+<body class="chat">
+
+  <div class="chat__sidebar">
+    <h3>People</h3>
+    <div id="users"></div>
+  </div>
+
+  <div class="chat__main">
+
+    <ol id="messages" class="chat__messages">
+      <!-- <li></li> -->
+      <!--  List of messages will be created by JS file-->
+    </ol>
+  <div class="chat__footer">
+        <form id="message-form">
+          <input type="text" name="message"  placeholder="Message text here" autofocus autocomplete="off">
+          <button type="submit" value="Send" name="submit">Send</button>
+        </form>
+        <!-- Share Geolocation Button -->
+        <button id="send-location" name="send-location">Send location</button>
+  </div>
+  </div>
+
+<footer>
+  <h3><a href="https://socket.io/docs/">SocketIO docs.</a></h3>
+</footer>
+
    <script src="/socket.io/socket.io.js"></script>  <!-- SocketIO client library -->
    <script src="/js/libs/jquery-3.2.1.js"></script> <!-- jquery-3 -->
    <script src="/js/index.js"></script>  <!-- SocketIO JS code -->

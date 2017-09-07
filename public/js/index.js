@@ -37,13 +37,12 @@ socket.on('newLocationMessage', function(message) {
 });
 
 // Custom Event Emitter with Acknolegement to the client via callback function.
-function sendChatMessage( fromName, messageText) {
+function sendChatMessage( fromName, messageText, callback) {
         socket.emit('createMessage', {
              from: fromName,
              text: messageText
         }, function (data) { // get some data from server back.
-            console.log('Got it :', data);
-            return data;
+            if(callback) { callback( data); }
         });
 }
 //
@@ -55,7 +54,6 @@ sendChatMessage("Freddy", "Good Day, I am Freddy. How are you?");
 ///  "Send Message"  JQuery Event handler ( message form lession)
 
 jQuery('#message-form').on('submit', function (ev) {
-
   ev.preventDefault();   // JQuery to disable default form behavior
   // get all the inputs into an array.
    var $inputs = $('#message-form :input');
@@ -66,7 +64,10 @@ jQuery('#message-form').on('submit', function (ev) {
     // Send message if Any
     var name = "Freddy " + location.host;
     if(values.submit) {
-      sendChatMessage(name, values.message);
+        sendChatMessage(name, values.message, function() {
+        // clean message field in the form
+        jQuery('[name=message]').val('');
+      });
     }
 
 });
@@ -91,11 +92,14 @@ locationButton.on('click', function () {
   if(!navigator.geolocation) {
     return alert('Geolocation not supported by you browser.');
   }
-
+  // disable button in DOM during processing of navigator.geolocation.getCurrentPosition() call
+  locationButton.attr('disabled', 'disabled').text('Sending location ...');  //  jQuery adds  "disabled : disabled" attr
+              /// to the element of the DOM (button), And changing enscrition on the button.
   // Get browser's current position and send request 'createLocationMessage'
   /// for broadcast to others.
-  //
+  ///
   navigator.geolocation.getCurrentPosition( function (position){
+    locationButton.removeAttr('disabled').text('Send location');  // jQuery method removes attribute
       console.log("Current geolocation object  : ", position);
       socket.emit('createLocationMessage', { // send the message to server
         latitude: position.coords.latitude,
@@ -104,6 +108,8 @@ locationButton.on('click', function () {
           console.log('Got it : ', data);
       });
   }, function () { // error during navigator.geolocation request.
+      locationButton.removeAttr('disabled').text('Send location');
+       // jQuery method removes "disabled" attribute, AND restores the enscryption.
       alert("Not able to fetch current location.");
   });
 

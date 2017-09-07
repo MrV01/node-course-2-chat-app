@@ -1,6 +1,7 @@
 //
 // JS code For the client side of node-chat-app
 //
+// 
 var socket = io();  // initiate  Socket  from client to the web host.
 
 // Supposed to work in ES5 browsers, therefore funtion(){} instead of () => {}
@@ -18,19 +19,21 @@ socket.on('disconnect', function() {
 // Custom event listener newMessage
 socket.on('newMessage', function(message) {
   console.log('newMessage', message);
+  var formattedTime = moment(message.createdAt).format('h:mm a');
   // Add message to the DOM  <ol id="messages"></ol>
   var li = jQuery('<li></li>');
-  li.text(`${message.from} : ${message.text}`);
+  li.text(`${message.from} ${formattedTime}: ${message.text}`);
   jQuery('#messages').append(li);
 });
 
 /////// Custom event listener  on the client (browser) side.
 socket.on('newLocationMessage', function(message) {
     console.log('newLocationMessage', message);
+    var formattedTime = moment(message.createdAt).format('h:mm a');
     var li = jQuery('<li></li>');
     // !Eurica! Ancor tag for the URL required for clicking
     var a = jQuery('<a target="_blank">My current location</a>');
-    li.text(`${message.from}: `);
+    li.text(`${message.from} ${formattedTime}: `);
     a.attr('href', message.url);   // to prevent code injection
     li.append(a);
     jQuery('#messages').append(li);

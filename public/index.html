@@ -2,68 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Join | ChatApp</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <title>The Chat App</title>
 </head>
-<body class="chat">
-
-  <div class="chat__sidebar">
-    <h3>People</h3>
-    <div id="users"></div>
+<body class="centered-form">
+  <div class="centered-form__form">
+  <form class="" action="/chat.html">
+        <div class="form-field">
+            <h3>Join a Chat</h3>
+        </div>
+    <div class="form-field">
+          <label>Display name</label>
+          <input type="text" name="name" autofocus/>
+    </div>
+    <div class="form-field">
+        <label>Room name</label>
+        <input type="text" name="room"/>
+    </div>
+    <div class="form-field">
+        <button>Join</button>
+    </div>
+  </form>
   </div>
-
-  <div class="chat__main">
-
-    <ol id="messages" class="chat__messages">
-      <!-- <li></li> -->
-      <!--  List of messages will be created by JS file-->
-    </ol>
-  <div class="chat__footer">
-        <form id="message-form">
-          <input type="text" name="message"  placeholder="Message text here" autofocus autocomplete="off">
-          <button type="submit" value="Send" name="submit">Send</button>
-        </form>
-        <!-- Share Geolocation Button -->
-        <button id="send-location" name="send-location">Send location</button>
-  </div>
-  </div>
-
-  <script id="message-template" type="text/template">
-    <li class="message">
-      <div class="messsage__title">
-          <h4>{{from}}</h4> <!-- value of the property from : value -->
-          <span>{{createdAt}}</span>  <!-- value of the property createdAt : value -->
-      </div>
-      <div class="message__body">
-          <p>{{text}}</p>  <!-- value of the property text : value -->
-      </div>
-    </li>
-  </script>
-
-  <script id="location-message-template" type="text/template">
-    <li class="message">
-      <div class="messsage__title">
-          <h4>{{from}}</h4> <!-- value of the property from : value -->
-          <span>{{createdAt}}</span>  <!-- value of the property createdAt : value -->
-      </div>
-      <div class="message__body">
-          <p>
-            <a href="{{url}}" target="_blank">My current location</a>
-          </p>  <!-- value of the property url : value -->
-      </div>
-    </li>
-  </script>
-
-<footer>
-  <h3><a href="https://socket.io/docs/">SocketIO docs.</a></h3>
-</footer>
-
-   <script src="/socket.io/socket.io.js"></script>  <!-- SocketIO client library -->
-   <script src="/js/libs/jquery-3.2.1.js"></script> <!-- jquery-3 -->
-   <script src="/js/libs/moment.js" charset="utf-8"></script> <!-- Time Library-->
-  <script src="/js/libs/mustache.js" charset="utf-8"></script> <!--  an implementation of the mustache template system in JavaScript. -->
-   <script src="/js/index.js"></script>  <!-- SocketIO JS code -->
+  <footer>
+    <h3><a href="https://socket.io/docs/" target="_blank">SocketIO docs.</a></h3>
+  </footer>
 </body>
 </html>

@@ -6,6 +6,37 @@
 //
 var socket = io();  // initiate  Socket  from client to the web host.
 
+/////// Called every time new message added to the "messages" area
+///////  to automatically scroll down list of messages and display the new one.
+//////  Depending on position of vertical SCROLLBAR of the element.
+/////  responsive solution, because takes vertical size of the window into account
+function scrollToBottom () {
+    // scrollHeight   ( scrollTop + clientHeight + message height)
+    // scrollTop     ( From the  scroll window  upper border to upper border of the vertical SCROLLBAR)
+    // clientHeight  ( vertical size of the scroll window in pixels)
+    // message height ( new message height  in pixels )
+
+  /// Selectors 1. Messages area:
+  var messages = jQuery('#messages');
+  /// Selectors 2. new message is last child fo the messages list.
+  var newMessage = messages.children('li:last-child');  // last member of the list
+  /// Heights ( supplies by jQuery object in pixels)
+  var clientHeight = messages.prop('clientHeight');  // jQuery function : http://api.jquery.com/prop/
+  var scrollTop = messages.prop('scrollTop') ;
+  var scrollHeight = messages.prop('scrollHeight');
+  var newMessageHeight = newMessage.innerHeight();  // message height including padding
+  var lastMessageHeight = newMessage.prev().innerHeight(); // message height(and padding) of the last message.
+
+  if( clientHeight + scrollTop  + newMessageHeight + lastMessageHeight >= scrollHeight ) {  // scroll to bottom
+    console.log(`SCROLL: ${clientHeight + scrollTop  + newMessageHeight + lastMessageHeight} >= ${scrollHeight}  where scroll  ${scrollHeight} client:${clientHeight} top:${scrollTop} new:${newMessageHeight} last:${lastMessageHeight}`);
+    messages.scrollTop(scrollHeight);  // jQuery method https://api.jquery.com/scrollTop/
+                  /////  scrollHeight indicating the new position to set the scroll bar to.
+  } else {
+     console.log(`NOT scroll: ${clientHeight + scrollTop  + newMessageHeight + lastMessageHeight} >= ${scrollHeight} where scroll  ${scrollHeight} client:${clientHeight} top:${scrollTop} new:${newMessageHeight} last:${lastMessageHeight} `);
+  }
+
+};
+
 // Supposed to work in ES5 browsers, therefore funtion(){} instead of () => {}
 // Listens for embedded/internal SocketIO events:  connect, disconnect
 socket.on('connect', function() {
@@ -28,7 +59,7 @@ socket.on('newMessage', function(message) {
       createdAt : formattedTime
   });  // convert template to html, displaying properties.
   jQuery('#messages').append(html);   // attach HTML to the list of messages
-
+  scrollToBottom();
 });
 
 /////// Custom event listener  on the client (browser) side.
@@ -42,6 +73,7 @@ socket.on('newLocationMessage', function(message) {
         createdAt : formattedTime
     });  // convert template to html, displaying properties.
     jQuery('#messages').append(html);   // attach HTML to the list of messages
+    scrollToBottom();
 
     //////////////// jQuery - DOM manipulation version (difficult to maintain and debug :-) )
     // console.log('newLocationMessage', message);

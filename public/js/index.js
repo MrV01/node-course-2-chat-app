@@ -1,7 +1,9 @@
 //
 // JS code For the client side of node-chat-app
 //
-// 
+// Introducing teemplate engine moustach,js ( https://github.com/janl/mustache.js/ )
+//  to handle DOM messages rendering tasks.  Added to index.html  file.
+//
 var socket = io();  // initiate  Socket  from client to the web host.
 
 // Supposed to work in ES5 browsers, therefore funtion(){} instead of () => {}
@@ -18,25 +20,39 @@ socket.on('disconnect', function() {
 
 // Custom event listener newMessage
 socket.on('newMessage', function(message) {
-  console.log('newMessage', message);
   var formattedTime = moment(message.createdAt).format('h:mm a');
-  // Add message to the DOM  <ol id="messages"></ol>
-  var li = jQuery('<li></li>');
-  li.text(`${message.from} ${formattedTime}: ${message.text}`);
-  jQuery('#messages').append(li);
+  var template =  jQuery('#message-template').html();  // template in index.html
+  var  html = Mustache.render(template, {
+      text: message.text,
+      from: message.from,
+      createdAt : formattedTime
+  });  // convert template to html, displaying properties.
+  jQuery('#messages').append(html);   // attach HTML to the list of messages
+
 });
 
 /////// Custom event listener  on the client (browser) side.
 socket.on('newLocationMessage', function(message) {
-    console.log('newLocationMessage', message);
+    // Challenge to display index.html template (id="location-message-template" type="text/template")
     var formattedTime = moment(message.createdAt).format('h:mm a');
-    var li = jQuery('<li></li>');
-    // !Eurica! Ancor tag for the URL required for clicking
-    var a = jQuery('<a target="_blank">My current location</a>');
-    li.text(`${message.from} ${formattedTime}: `);
-    a.attr('href', message.url);   // to prevent code injection
-    li.append(a);
-    jQuery('#messages').append(li);
+    var template =  jQuery('#location-message-template').html();  // template in index.html
+    var  html = Mustache.render(template, {
+        url: message.url,
+        from: message.from,
+        createdAt : formattedTime
+    });  // convert template to html, displaying properties.
+    jQuery('#messages').append(html);   // attach HTML to the list of messages
+
+    //////////////// jQuery - DOM manipulation version (difficult to maintain and debug :-) )
+    // console.log('newLocationMessage', message);
+    // var formattedTime = moment(message.createdAt).format('h:mm a');
+    // var li = jQuery('<li></li>');
+    // // !Eurica! Ancor tag for the URL required for clicking
+    // var a = jQuery('<a target="_blank">My current location</a>');
+    // li.text(`${message.from} ${formattedTime}: `);
+    // a.attr('href', message.url);   // to prevent code injection
+    // li.append(a);
+    // jQuery('#messages').append(li);
 });
 
 // Custom Event Emitter with Acknolegement to the client via callback function.

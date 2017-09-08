@@ -30,6 +30,32 @@
   </div>
   </div>
 
+  <script id="message-template" type="text/template">
+    <li class="message">
+      <div class="messsage__title">
+          <h4>{{from}}</h4> <!-- value of the property from : value -->
+          <span>{{createdAt}}</span>  <!-- value of the property createdAt : value -->
+      </div>
+      <div class="message__body">
+          <p>{{text}}</p>  <!-- value of the property text : value -->
+      </div>
+    </li>
+  </script>
+
+  <script id="location-message-template" type="text/template">
+    <li class="message">
+      <div class="messsage__title">
+          <h4>{{from}}</h4> <!-- value of the property from : value -->
+          <span>{{createdAt}}</span>  <!-- value of the property createdAt : value -->
+      </div>
+      <div class="message__body">
+          <p>
+            <a href="{{url}}" target="_blank">My current location</a>
+          </p>  <!-- value of the property url : value -->
+      </div>
+    </li>
+  </script>
+
 <footer>
   <h3><a href="https://socket.io/docs/">SocketIO docs.</a></h3>
 </footer>
@@ -37,6 +63,7 @@
    <script src="/socket.io/socket.io.js"></script>  <!-- SocketIO client library -->
    <script src="/js/libs/jquery-3.2.1.js"></script> <!-- jquery-3 -->
    <script src="/js/libs/moment.js" charset="utf-8"></script> <!-- Time Library-->
+  <script src="/js/libs/mustache.js" charset="utf-8"></script> <!--  an implementation of the mustache template system in JavaScript. -->
    <script src="/js/index.js"></script>  <!-- SocketIO JS code -->
 </body>
 </html>

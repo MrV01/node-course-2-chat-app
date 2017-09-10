@@ -1,4 +1,9 @@
 /////  Set up Chat Application
+/// Uses Socket.IO library:  https://socket.io/docs/rooms-and-namespaces/
+/// SocketIO servers can be communcated from non-socket.io processes
+///  with help of socket.io-emitter: https://github.com/socketio/socket.io-emitter
+///  Multiple nodes adapter:  https://github.com/socketio/socket.io-redis
+///  By running socket.io with the socket.io-redis adapter you can run multiple socket.io instances in different processes or servers that can all broadcast and emit events to and from each other.
 /// Run:  nodemon  server/server.js
 /// O HEROKY:
 ///    https://polar-depths-68329.herokuapp.com/
@@ -30,7 +35,7 @@ const express = require('express');
 const logger = require('morgan');
 const socketIO = require('socket.io');
 const {generateMessage, generateLocationMessage} = require('./utils/message');
-
+const {isRealString} = require('./utils/validation.js');
 
 var app = express();    // configure it below
 // Socket.IO   requires embedded http module .
@@ -68,17 +73,35 @@ function logSock(desc, socket) {
                     socket.handshake.query);
 };
 
-// Standard connection listener
+// Socket.IO standard connection listener
 io.on('connection', (socket) => {  // Particular client connection opens.
-    logSock('New user connected. using WebSocket.IO proto',socket);
+    logSock('New user connected.WebSocket.IO proto', socket);
+// Handler of join user and a chat room
+socket.on('join', (params, callback) => {
+   // Validate name and room
+    if(!isRealString(params.name) || !isRealString(params.room) ) {
+        callback('Required: name and room.');  // error
+    };
+    ///////
+    /////// THE name and room has been validated successfully, now start using them
+    //////  https://socket.io/docs/rooms-and-namespaces/
+    socket.join(params.room) ; // socket assigned to  particular room
+    // socket.leave('The office fans');  // Leave 'The office fans' chat room call
+    ///////////////// Legend of the no room to named room code conversion
+    // No Rooms (default room) version  -> Join Room ( named room) version
+    // io.emit   ->  io.to('room name').emit
+    // socket.broadcast.emit -> socket.broadcast.to('room name').emit
+    // socket.emit  ->  socket.emit  ( because  one to one connection used in one room only)
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Challenge  of Broadcast Events. New Functionality:
-/// 1. socket.emit  from: Admin  text: Welcome to the chat app
-socket.emit('newMessage', generateMessage( 'Admin', 'Welcome to the chat App') );
-/// 2. socket.broadcast.emit from:  Admin  text: New user joined
-// socket.broadcast.emit() method broadcast messages to "other" connected clients
-socket.broadcast.emit('newMessage', generateMessage( 'Admin', 'New User joined'));
+    /// 1. socket.emit (server to client) from: Admin  text: Welcome to the one connected chat app
+    socket.emit('newMessage', generateMessage( 'Admin', `Welcome to the chat App, User ${params.name} Room ${params.room}`) );
+    /// 2. socket.broadcast.to('room name').emit   From:  Admin  text: New user joined
+    // socket.broadcast.emit() method broadcast messages to "other" connected clients
+    socket.broadcast.to(params.room).emit('newMessage', generateMessage( 'Admin', ` ${params.name} user joined room: ${params.room}`));
+
+    callback(); // OK, no error happened during joining the room
+});
+
 
     //////////////////////////////////////////////////////////////////////
     // new createMessage custom event  listener
@@ -101,7 +124,7 @@ socket.broadcast.emit('newMessage', generateMessage( 'Admin', 'New User joined')
     socket.on('createLocationMessage', (coords,callback) => {
       console.log('createLocationMessage received : ', coords);
       io.emit('newLocationMessage',
-          generateLocationMessage('Admin', coords.latitude , coords.longitude));
+          generateLocationMessage(coords.from, coords.latitude , coords.longitude));
       callback('ACK from the server: createLocationMessage');
     });
 

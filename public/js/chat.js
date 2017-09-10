@@ -1,10 +1,28 @@
 //
 // JS code For the client side of node-chat-app
-//
-// Introducing teemplate engine moustach,js ( https://github.com/janl/mustache.js/ )
-//  to handle DOM messages rendering tasks.  Added to index.html  file.
-//
-var socket = io();  // initiate  Socket  from client to the web host.
+/////
+/////  Parent HTML page chat.html is opened
+/////  from a form in index.html with following parameters:
+/////    chat.html?name=Vlad&room=1
+/////    ( GET request: name=<name> room=<room>)
+/////   Join-Event should  handle new user, and assagn the proper "room" to the user.
+////    the name and room are located in BOM object  "window.location.search"
+/////    which has a value: "?name=www&room=e"
+////      Using  third party .deparam() to convert search string back to the object.
+/////        https://github.com/AceMetrix/jquery-deparam
+/////       ( jQuery does not include .deparam method. It does after adding jquery-deparam script. ).
+////        jQuery.deparam(window.location.search.split('?').length>0?[1]:[0];
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Get the page's  parameters.  Fixes extra ? issue.
+function getPageParams() {
+   var parr = window.location.search.split('?');
+   if(parr.length > 1) parr.shift(); // remove first part before "?"
+   return jQuery.deparam(parr[0]);
+}
+///  Introducing teemplate engine moustach,js ( https://github.com/janl/mustache.js/ )
+///  to handle DOM messages rendering tasks.  Added to chat.html  file.
+//////
+var socket = io();  // initiate  Socket.IO  from client to the web host.
 
 /////// Called every time new message added to the "messages" area
 ///////  to automatically scroll down list of messages and display the new one.
@@ -40,7 +58,17 @@ function scrollToBottom () {
 // Supposed to work in ES5 browsers, therefore funtion(){} instead of () => {}
 // Listens for embedded/internal SocketIO events:  connect, disconnect
 socket.on('connect', function() {
-    console.log("Connected to server over Socket.IO");
+    var params = getPageParams();
+    console.log("Connected Socket.IO server. Joining as: ", params);
+    // Embedded  Socket.IO event.  Join-Event:
+    socket.emit('join',  params, function (err) {
+      if(err) {  // send user back to login page (index.html)
+        alert(err);
+        window.location.href = '/';
+      } else {
+        console.log('No error. validation passed');
+      };
+    });
 
 });
 
@@ -96,8 +124,8 @@ function sendChatMessage( fromName, messageText, callback) {
             if(callback) { callback( data); }
         });
 }
-//
-sendChatMessage("Freddy", "Good Day, I am Freddy. How are you?");
+
+/// sendChatMessage("Freddy", "Good Day, I am Freddy. How are you?");
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// Message form , Geolocation  lectures.
@@ -113,11 +141,11 @@ jQuery('#message-form').on('submit', function (ev) {
        values[this.name] = $(this).val();
     });
     // Send message if Any
-    var name = "Freddy " + location.host;
     if(values.submit) {
+        var name = getPageParams().name;
         sendChatMessage(name, values.message, function() {
-        // clean message field in the form
-        jQuery('[name=message]').val('');
+            // clean message field in the form when sent.
+            jQuery('[name=message]').val('');
       });
     }
 
@@ -153,6 +181,7 @@ locationButton.on('click', function () {
     locationButton.removeAttr('disabled').text('Send location');  // jQuery method removes attribute
       console.log("Current geolocation object  : ", position);
       socket.emit('createLocationMessage', { // send the message to server
+       from:  getPageParams().name,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude
       }, function (data) { // get back data from server.

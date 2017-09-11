@@ -36,6 +36,7 @@ const logger = require('morgan');
 const socketIO = require('socket.io');
 const {generateMessage, generateLocationMessage} = require('./utils/message');
 const {isRealString} = require('./utils/validation.js');
+const {Users} = require('./utils/users');
 
 var app = express();    // configure it below
 // Socket.IO   requires embedded http module .
@@ -48,6 +49,9 @@ var io = socketIO(server);   //  Socket IO integrated to HTTP server
 //      and transfer data:  localhost:3000/socket.io/socket.io.js
 // DOCs available: https://socket.io/docs/
 //
+// List of users, joined the chat on this server
+var users = new Users();
+
 app.use(logger('dev'));   // argument: 'combined' in production
 // Serve static files from   public directory, using express.static middleware.
 app.use(express.static(publicPath));
@@ -76,17 +80,24 @@ function logSock(desc, socket) {
 // Socket.IO standard connection listener
 io.on('connection', (socket) => {  // Particular client connection opens.
     logSock('New user connected.WebSocket.IO proto', socket);
-// Handler of join user and a chat room
-socket.on('join', (params, callback) => {
+  // Handler of join user and a chat room
+  socket.on('join', (params, callback) => {
    // Validate name and room
     if(!isRealString(params.name) || !isRealString(params.room) ) {
-        callback('Required: name and room.');  // error
+        return callback('Required: name and room.');  // error in verification
     };
     ///////
     /////// THE name and room has been validated successfully, now start using them
     //////  https://socket.io/docs/rooms-and-namespaces/
     socket.join(params.room) ; // socket assigned to  particular room
     // socket.leave('The office fans');  // Leave 'The office fans' chat room call
+    // Clean-up : Remove  user from froma any other potentially joined room.
+    users.removeUser(socket.id);
+    // Add user to the list of Users . Where socket.id has been set by SocketIO
+    users.addUser(socket.id, params.name , params.room);
+    // emit event to update user list on the screens of  users of the room (chat.js)
+    io.to(params.room).emit('updateUserList', users.getUserList(params.room));
+
     ///////////////// Legend of the no room to named room code conversion
     // No Rooms (default room) version  -> Join Room ( named room) version
     // io.emit   ->  io.to('room name').emit
@@ -100,7 +111,7 @@ socket.on('join', (params, callback) => {
     socket.broadcast.to(params.room).emit('newMessage', generateMessage( 'Admin', ` ${params.name} user joined room: ${params.room}`));
 
     callback(); // OK, no error happened during joining the room
-});
+  });
 
 
     //////////////////////////////////////////////////////////////////////
@@ -109,13 +120,16 @@ socket.on('join', (params, callback) => {
 
     socket.on('createMessage', (message, callback) => {
       console.log('createMessage received : ', message);
-      // Section9 . Lecture 109.  Also broadcast message to connected clients.
-       // io.emit() method broadcast messages to all connected clients
-       io.emit('newMessage', generateMessage(message.from, message.text));
-       // Lecture 111. Acknolegement callback to the client.
+      // get  user  name from the list of users
+      var user = users.getUser(socket.id) ;
+      if(user && isRealString(message.text)) {
+         // Broadcast message to users of the room
+         // io.emit() method broadcast messages to all connected clients
+          io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+      }
+       //  Acknolegement callback to the client.
        callback('ACK from the server: createMessage');  // acknolegement to the client
     });
-
 
     //////////////////////////////////////////////////////////////
     /// Share location message to the clients
@@ -123,16 +137,24 @@ socket.on('join', (params, callback) => {
 
     socket.on('createLocationMessage', (coords,callback) => {
       console.log('createLocationMessage received : ', coords);
-      io.emit('newLocationMessage',
-          generateLocationMessage(coords.from, coords.latitude , coords.longitude));
+      var user = users.getUser(socket.id) ;
+      if(user) {  // user presents in the list 
+          io.to(user.room).emit('newLocationMessage',
+          generateLocationMessage(user.name, coords.latitude , coords.longitude));
+      }
       callback('ACK from the server: createLocationMessage');
     });
 
     //////////////////////////////////////////////////////////////////////
     // Standard  socketIO  client "disconnect" event listener
     ///////////////////////////////////////////////////////////////////////
-    socket.on('disconnect', (socket) => {
-      console.log("Disconnected from server Socket.IO",socket);
+    socket.on('disconnect', () => {
+      console.log("Disconnected from server socket.id : ", socket.id );
+      var user = users.removeUser(socket.id);
+      if(user) {  // there was such user in the user.room
+        io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+        io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left`));
+      }
     });
 
 });   //// IO on  'connection'.

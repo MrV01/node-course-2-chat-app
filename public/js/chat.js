@@ -77,7 +77,24 @@ socket.on('disconnect', function() {
   console.log("Disconnected from server Socket.IO");
 });
 
-// Custom event listener newMessage
+///// Update user list event . ( regarding displaying list of people on the left pane of window)
+ socket.on('updateUserList', function (users) {
+    console.log('Users list:', users);
+    // Create ordered list element
+    var ol = jQuery('<ol></ol>');
+    // Put user names to the list element
+    users.forEach( function (user) {
+        ol.append(jQuery('<li></li>').text(user));
+    });
+    // Attach list element to the DOM
+    // <div class="chat__sidebar">
+    //   <h3>People</h3>
+    //   <div id="users"></div>
+    // </div>
+    jQuery('#users').html(ol);
+ });
+
+////// Custom event listener newMessage
 socket.on('newMessage', function(message) {
   var formattedTime = moment(message.createdAt).format('h:mm a');
   var template =  jQuery('#message-template').html();  // template in index.html
